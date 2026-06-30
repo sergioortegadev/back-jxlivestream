@@ -15,8 +15,7 @@ const nmsConfig = {
     chunk_size: config.rtmp.chunk_size,
   },
   http: {
-    port: 0,
-    // port: config.http.port,
+    port: config.http.port + 1, // NMS internal HTTP server uses a different port than Express
     mediaroot: config.http.mediaroot,
   },
   trans: {
@@ -41,8 +40,10 @@ app.use(cors());
 
 // Servir los archivos estáticos (web prueba)
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const publicPath = path.resolve(path.dirname(__dirname), 'public');
+const publicPath = path.resolve(__dirname, 'public');
+const mediaPath = path.resolve(__dirname, '../media');
 app.use(express.static(publicPath));
+app.use(express.static(mediaPath));
 
 // Endpoing para obtener URL del stream (este usará la app desarrollada en React Native)
 app.get('/api/stream-url', (req, res) => {
