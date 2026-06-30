@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 128 128"
+     width="128"
+     height="128">
+
+  <!-- Fondo circular -->
+  <circle cx="64" cy="64" r="60" fill="#8C3AE9"/>
+
+  <!-- Ondas -->
+  <path d="M32 48
+           C47 38,81 38,96 48"
+        fill="none"
+        stroke="#ffffff"
+        stroke-width="6"
+        stroke-linecap="round"/>
+
+  <path d="M40 64
+           C51 57,77 57,88 64"
+        fill="none"
+        stroke="#ffffff"
+        stroke-width="6"
+        stroke-linecap="round"/>
+
+  <path d="M50 80
+           C56 76,72 76,78 80"
+        fill="none"
+        stroke="#ffff00"
+        stroke-width="10"
+        stroke-linecap="round"/>
+</svg>

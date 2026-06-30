@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+ <meta charset="UTF-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <title>Radio Stream - Web Player</title>
+ <link rel="icon" type="image/svg+xml" href="./logo.svg">
+ <style>
+  * {
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+  }
+
+  body {
+   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+   min-height: 100vh;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   padding: 20px;
+  }
+
+  .container {
+   z-index: 0;
+   background: white;
+   border-radius: 16px;
+   padding: 40px;
+   max-width: 400px;
+   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  h1 {
+   text-align: center;
+   margin-bottom: 10px;
+   color: #333;
+  }
+
+  .logo {
+   z-index: -10;
+   position: relative;
+   margin-top: -12.5rem;
+   left: -5rem;
+   width: 10rem;
+   transform: rotate(-0.095turn);
+  }
+
+  .status {
+   text-align: center;
+   color: #999;
+   font-size: 14px;
+   margin-bottom: 30px;
+  }
+
+  h1,
+  .status {
+   text-align: right;
+  }
+
+  .player {
+   background: #f5f5f5;
+   border-radius: 12px;
+   padding: 20px;
+   margin-bottom: 20px;
+   text-align: center;
+  }
+
+  audio {
+   width: 100%;
+   margin-bottom: 15px;
+  }
+
+  .stream-info {
+   background: #f0f0f0;
+   padding: 12px;
+   border-radius: 8px;
+   margin-bottom: 15px;
+   font-size: 12px;
+   color: #666;
+   word-break: break-all;
+  }
+
+  button {
+   width: 100%;
+   padding: 12px;
+   margin-bottom: 10px;
+   border: none;
+   border-radius: 8px;
+   font-size: 16px;
+   font-weight: 600;
+   cursor: pointer;
+   transition: all 0.3s;
+  }
+
+  .btn-play {
+   background: #667eea;
+   color: white;
+  }
+
+  .btn-play:hover {
+   background: #5568d3;
+  }
+
+  .btn-stop {
+   background: #e74c3c;
+   color: white;
+  }
+
+  .btn-stop:hover {
+   background: #c0392b;
+  }
+
+  .info {
+   min-width: 18rem;
+   height: 10rem;
+   background: #ddd;
+   border: 1px solid #888;
+   color: #333;
+   padding: 1rem;
+   border-radius: 8px;
+   font-size: 14px;
+   line-height: 1.6;
+  }
+
+  .playbtn {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   height: 8rem;
+   margin: 0 auto
+  }
+ </style>
+</head>
+
+<body>
+ <div class="container">
+  <h1>Jx Live Radio</h1>
+  <p class="status">Escuchá la transmisión en vivo</p>
+
+  <img class="logo" src="./logo.svg" alt="logo">
+
+  <div class="player">
+   <audio id="player" controls></audio>
+   <div class="stream-info" id="streamUrl">Cargando URL...</div>
+   <button class="btn-play" onclick="play()">▶ Play</button>
+   <button class="btn-stop" onclick="stop()">⏹ Stop</button>
+  </div>
+
+  <div class="info">
+   <h3>
+    <strong>Descarga la App</strong>
+   </h3>
+   <a href="#">
+    <img class="playbtn" src="./play.png" alt="playstore">
+   </a>
+  </div>
+ </div>
+
+ <script>
+  const audio = document.getElementById("player");
+  const streamUrlDiv = document.getElementById("streamUrl");
+
+  // Obtener URL del stream desde la API
+  async function getStreamUrl() {
+   try {
+    const response = await fetch("/api/stream-url");
+    const data = await response.json();
+    return data.url;
+   } catch (error) {
+    console.error("Error fetching stream URL:", error);
+    return null;
+   }
+  }
+
+  // Inicializar
+  (async () => {
+   const url = await getStreamUrl();
+   if (url) {
+    streamUrlDiv.textContent = url;
+    audio.src = url;
+   } else {
+    streamUrlDiv.textContent = "Error al conectar con el servidor";
+   }
+  })();
+
+  function play() {
+   audio.play();
+  }
+
+  function stop() {
+   audio.pause();
+   audio.currentTime = 0;
+  }
+ </script>
+</body>
+
+</html>
