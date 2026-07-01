@@ -1,3 +1,7 @@
+import { config as loadEnv } from 'dotenv';
+
+loadEnv();
+
 const config = {
   rtmp: {
     port: Number(process.env.RTMP_PORT) || 1935,
@@ -14,7 +18,7 @@ const config = {
   },
 
   ffmpeg: {
-    path: '/usr/bin/ffmpeg',
+    path: process.env.FFMPEG ?? '/usr/bin/ffmpeg',
   },
 
   stream: {
