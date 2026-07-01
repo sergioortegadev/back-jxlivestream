@@ -1,0 +1,18 @@
+src/
+
+├── config/
+│   └── config.ts
+│
+├── public/
+│   ├── index.html
+│   ├── styles.css
+│   └── logo.svg
+│
+├── services/
+│   └── broadcaster.ts
+│
+├── routes/
+│   ├── publish.ts
+│   └── audio.ts
+│
+├── server.ts
