@@ -1,13 +1,16 @@
 const config = {
   rtmp: {
-    port: 1935,
+    port: Number(process.env.RTMP_PORT) || 1935,
     chunk_size: 4000,
   },
 
   http: {
-    port: 8000,
+    port: Number(process.env.PORT) || 8000,
+    host: process.env.HOST || '0.0.0.0',
     mediaroot: './media',
     allow_origin: '*', // ⚠️ Change this in prod ⚠️
+    // Optional public URL for building external links (e.g. https://my-app.onrender.com)
+    publicUrl: process.env.PUBLIC_URL || '',
   },
 
   ffmpeg: {

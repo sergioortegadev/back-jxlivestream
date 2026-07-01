@@ -47,21 +47,32 @@ app.use(express.static(mediaPath));
 
 // Endpoing para obtener URL del stream (este usará la app desarrollada en React Native)
 app.get('/api/stream-url', (req, res) => {
-  const streamUrl = `http://localhost:${config.http.port}/${config.stream.app}/${config.stream.key}/index.m3u8`; // ⚠️ Verify this in prod ⚠️
+  const base = config.http.publicUrl || `${req.protocol}://${req.get('host')}`;
+  const streamUrl = `${base}/${config.stream.app}/${config.stream.key}/index.m3u8`;
   res.json({ url: streamUrl });
 });
 
 // Endpoint para estado del server (Health)
 app.get('/api/health', (req, res) => {
+  const basePublic = config.http.publicUrl || `http://localhost:${config.http.port}`;
+  let publicHost = 'localhost';
+  if (config.http.publicUrl) {
+    try {
+      publicHost = new URL(config.http.publicUrl).hostname;
+    } catch (e) {
+      // ignore
+    }
+  }
+
   res.json({
     status: 'ok',
     rtpm: {
-      host: 'localhost', // ⚠️ Verify this in prod ⚠️
+      host: publicHost,
       port: config.rtmp.port,
     },
     stream: {
-      pushUrl: `rtmp://localhost:${config.rtmp.port}/${config.stream.app}/${config.stream.key}`,
-      playUrl: `http://localhost:${config.http.port}/${config.stream.app}/${config.stream.key}/index.m3u8`,
+      pushUrl: `rtmp://${publicHost}:${config.rtmp.port}/${config.stream.app}/${config.stream.key}`,
+      playUrl: `${basePublic}/${config.stream.app}/${config.stream.key}/index.m3u8`,
     },
   });
 });
@@ -82,7 +93,8 @@ nms.on('prePublish', (id, StreamPath, args) => {
 });
 nms.on('postPublish', (id, StreamPath, args) => {
   console.log(` [NMS] ✅ Stream Publicado: ${StreamPath}`);
-  console.log(`    -> Reproducir en http://localhost:${config.http.port}${StreamPath}/index.m3u8`);
+  const baseForLogs = config.http.publicUrl || `http://localhost:${config.http.port}`;
+  console.log(`    -> Reproducir en ${baseForLogs}${StreamPath}/index.m3u8`);
 });
 nms.on('donePublish', (id, StreamPath, args) => {
   console.log(` [NMS] ❌ Stream Finalizado: ${StreamPath}`);
@@ -97,22 +109,24 @@ nms.on('postPlay', (id, StreamPath, args) => {
 
 // Inicia server
 nms.run();
-app.listen(config.http.port, () => {
+app.listen(config.http.port, config.http.host, () => {
   console.log(`\n-------------------------------------------------`);
   console.log(`  📻  JxLiveStream runnig ok`);
   console.log(`---------------------------------------------------`);
   console.log(`\n     ⤷ 🔴 RTMP (push from OBS): `);
   console.log(
-    `      rtmp://localhost:${config.rtmp.port}/${config.stream.app}/${config.stream.key}`
+    `      rtmp://${config.http.publicUrl ? new URL(config.http.publicUrl).hostname : 'localhost'}:${config.rtmp.port}/${config.stream.app}/${config.stream.key}`
   );
   console.log(`\n     ▶️ HLS Stream (escuchar):`);
   console.log(
-    `      http://localhost:${config.http.port}/${config.stream.app}/${config.stream.key}/index.m3u8`
+    `${config.http.publicUrl || `      http://localhost:${config.http.port}/${config.stream.app}/${config.stream.key}/index.m3u8`}`
   );
   console.log(`\n     🌐 Web (test):`);
-  console.log(`      http://localhost:${config.http.port}`);
+  console.log(`      ${config.http.publicUrl || `http://localhost:${config.http.port}`}`);
   console.log(`\n     🔗 API Health:`);
-  console.log(`      http://localhost:${config.http.port}/api/health`);
+  console.log(
+    `      ${config.http.publicUrl || `http://localhost:${config.http.port}/api/health`}`
+  );
   console.log(`\n`);
 });
 
