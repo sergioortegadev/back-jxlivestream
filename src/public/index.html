@@ -143,7 +143,9 @@
 
   <div class="player">
    <audio id="player" controls src="/audio"></audio>
-   <div class="stream-info" id="streamUrl">Cargando URL...</div>
+   <div class="stream-info" id="streamStatus">
+    Consultando estado de la transmisión...
+   </div>
    <button class="btn-play" onclick="play()">▶ Play</button>
    <button class="btn-stop" onclick="stop()">⏹ Stop</button>
   </div>
@@ -160,30 +162,31 @@
 
  <script>
   const audio = document.getElementById("player");
-  const streamUrlDiv = document.getElementById("streamUrl");
+  const streamStatus = document.getElementById("streamStatus");
 
-  // Obtener URL del stream desde la API
-  async function getStreamUrl() {
+  async function updateStatus() {
    try {
-    const response = await fetch("/api/stream-url");
+    const response = await fetch("/health");
     const data = await response.json();
-    return data.url;
+
+    if (data.publisherConnected) {
+     streamStatus.textContent = "🟢 Estamos en Vivo, escuchanos 🟢";
+     streamStatus.style.background = "#d4edda";
+     streamStatus.style.color = "#155724";
+     streamStatus.style.border = "1px solid #28a745";
+    } else {
+     streamStatus.textContent = "❌ No estamos transmitiendo ❌";
+     streamStatus.style.background = "#f8d7da";
+     streamStatus.style.color = "#721c24";
+     streamStatus.style.border = "1px solid #dc3545";
+    }
    } catch (error) {
-    console.error("Error fetching stream URL:", error);
-    return null;
+    streamStatus.textContent = "⚠️ No se pudo conectar al servidor";
+    streamStatus.style.background = "#fff3cd";
+    streamStatus.style.color = "#856404";
+    streamStatus.style.border = "1px solid #ffc107";
    }
   }
-
-  // Inicializar
-  (async () => {
-   const url = await getStreamUrl();
-   if (url) {
-    streamUrlDiv.textContent = url;
-    audio.src = url;
-   } else {
-    streamUrlDiv.textContent = "Error al conectar con el servidor";
-   }
-  })();
 
   function play() {
    audio.play();
@@ -193,6 +196,12 @@
    audio.pause();
    audio.currentTime = 0;
   }
+
+  // Estado inicial
+  updateStatus();
+
+  // Actualizar cada 5 segundos
+  setInterval(updateStatus, 5000);
  </script>
 </body>
 
