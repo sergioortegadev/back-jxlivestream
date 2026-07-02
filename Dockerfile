@@ -8,10 +8,11 @@ WORKDIR /app
 # Copiar package.json y archivos TS necesarios
 COPY package*.json ./
 COPY tsconfig.json ./
-COPY src/ ./src/
 
 # Instalar dependencias
 RUN npm ci
+
+COPY src/ ./src/
 
 # Build (si usas TS)
 RUN npm run build
