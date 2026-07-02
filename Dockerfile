@@ -7,22 +7,23 @@ WORKDIR /app
 
 # Copiar package.json y archivos TS necesarios
 COPY package*.json ./
-COPY patches/ ./patches/
 COPY tsconfig.json ./
-COPY src/ ./src/
 
 # Instalar dependencias
 RUN npm ci
 
+COPY src/ ./src/
+
 # Build (si usas TS)
 RUN npm run build
-RUN cp -R src/public ./dist/public
 
-# Reducir tamaño final de imagen
+# Archivos estáticos
+RUN cp -R src/public dist/public
+
+# Eliminar dependencias de desarrollo, reduce tamaño final de imagen
 RUN npm prune --omit=dev
 
-# Exponer puertos (HTTP y RTMP)
-EXPOSE 8000 1935
+# Render inyecta PORT
+EXPOSE 8000
 
-# Comando
 CMD ["npm", "start"]
