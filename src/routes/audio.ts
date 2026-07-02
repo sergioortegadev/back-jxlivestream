@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import broadcaster from "../services/index.js";
+import broadcaster from '../services/index.js';
 
 const router = Router();
 
@@ -10,6 +10,7 @@ router.get('/', (req, res) => {
     Connection: 'keep-alive',
     'Transfer-Encoding': 'chunked',
     'Access-Control-Allow-Origin': '*',
+    'X-Accel-Buffering': 'no',
   });
 
   broadcaster.subscribe(res);

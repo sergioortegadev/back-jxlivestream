@@ -12,4 +12,6 @@ export default {
   stream: {
     path: '/audio',
   },
+
+  publishToken: process.env.PUBLISH_TOKEN ?? '',
 };

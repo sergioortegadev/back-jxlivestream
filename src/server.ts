@@ -6,7 +6,8 @@ import { fileURLToPath } from 'url';
 import config from './config/config.js';
 import publishRoute from './routes/publish.js';
 import audioRoute from './routes/audio.js';
-import broadcaster from './services/index.js';
+import healthRoute from './routes/health.js';
+// import broadcaster from './services/index.js';
 
 const app = express();
 app.use(cors());
@@ -30,35 +31,22 @@ app.get('/api/stream-url', (req, res) => {
 });
 
 // Endpoint para estado del server (Health)
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    listeners: broadcaster.getStats().listeners,
-    bufferedChunks: broadcaster.getStats().bufferedChunks,
-    stream: {
-      publish: '/publish',
-      audio: '/audio',
-    },
-  });
-});
-
+app.use('/health', healthRoute);
 
 // Inicia server
 app.listen(config.http.port, config.http.host, () => {
-  const base =
-    config.http.publicUrl ||
-    `http://${config.http.host}:${config.http.port}`;
+  const base = config.http.publicUrl || `http://${config.http.host}:${config.http.port}`;
 
   console.log(`\n -------------------------------------------------------------------------`);
   console.log(`  📻  JxLiveStream runnig ok`);
   console.log(` -------------------------------------------------------------------------`);
   console.log(`\n   ⤷ 🔴 (push from OBS) -> sender -> POST ${base}/publish`);
-  
+
   console.log(`\n   🎧 GET - ${base}/audio`);
-  
+
   console.log(`\n   🌐 Web (test): ${base}`);
-  
-  console.log(`\n   ❤️  ${base}/api/health`);
+
+  console.log(`\n   ❤️  ${base}/health`);
   console.log(
     `      ${config.http.publicUrl || `${config.http.host}:${config.http.port}/api/health`}`
   );
