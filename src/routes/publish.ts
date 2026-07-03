@@ -2,34 +2,60 @@
 import { Router } from 'express';
 import broadcaster from '../services/index.js';
 import authPublish from '../middleware/authPublish.js';
+import { simpleLog } from '../helpers/helpers.js';
 
 const router = Router();
 
 router.post('/', authPublish, (req, res) => {
-  console.log('   ✅ Publisher conectado');
+  console.log(`  ${simpleLog()}   ✅ Publisher conectado`);
 
   broadcaster.publisherStarted();
+
+  let finished = false;
+
+  const stopPublisher = () => {
+    if (finished) return;
+
+    finished = true;
+    broadcaster.publisherStopped();
+  };
 
   req.on('data', (chunk: Buffer) => {
     broadcaster.publish(chunk);
   });
 
   req.on('end', () => {
-    console.log('   ✳️ Publisher desconectado');
+    console.log(`  ${simpleLog()}   ✳️ Publisher desconectado`);
 
-    broadcaster.publisherStopped();
+    stopPublisher();
 
     res.sendStatus(200);
   });
 
+  req.on('aborted', () => {
+    console.log(`  ${simpleLog()}   ✳️ Publisher desconectado (aborted)`);
+
+    stopPublisher();
+  });
+
   req.on('close', () => {
-    broadcaster.publisherStopped();
+    stopPublisher();
   });
 
   req.on('error', (err) => {
-    console.error(` Error en publish: ${err}`);
+    const message = err instanceof Error ? err.message : String(err);
 
-    broadcaster.publisherStopped();
+    // `aborted` ocurre cuando el emisor corta o reconecta; no es un 500 del servidor.
+    if (message.toLowerCase().includes('aborted')) {
+      console.log(`  ${simpleLog()}   ✳️ Publisher desconectado (aborted)`);
+      stopPublisher();
+
+      return;
+    }
+
+    console.error(`  ${simpleLog()}   Error (500) en publish: ${message}`);
+
+    stopPublisher();
 
     if (!res.headersSent) {
       res.sendStatus(500);
