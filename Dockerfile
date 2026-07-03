@@ -1,4 +1,4 @@
-FROM node:20
+FROM node:26
 
 # ✅ Instalar ffmpeg
 RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
