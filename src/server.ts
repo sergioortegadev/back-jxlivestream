@@ -7,6 +7,7 @@ import config from './config/config.js';
 import publishRoute from './routes/publish.js';
 import audioRoute from './routes/audio.js';
 import healthRoute from './routes/health.js';
+import { simpleLog } from './helpers/helpers.js';
 // import broadcaster from './services/index.js';
 
 const app = express();
@@ -34,7 +35,7 @@ app.get('/api/stream-url', (req, res) => {
 app.use('/health', healthRoute);
 
 // Inicia server
-app.listen(config.http.port, config.http.host, () => {
+const server = app.listen(config.http.port, config.http.host, () => {
   const base = config.http.publicUrl || `http://${config.http.host}:${config.http.port}`;
 
   console.log(`\n -------------------------------------------------------------------------`);
@@ -50,12 +51,17 @@ app.listen(config.http.port, config.http.host, () => {
   console.log(
     `      ${config.http.publicUrl || `${config.http.host}:${config.http.port}/api/health`}`
   );
+  console.log(`\n    ${simpleLog()} Inicio del sistema \n`);
+  
   console.log(` -------------------------------------------------------------------------`);
   console.log(`\n`);
 });
 
+// `/publish` es un POST largo (streaming), por eso no debe expirar a los 5 minutos.
+server.requestTimeout = 0;
+
 // Graceful shutdown
 process.on('SIGINT', () => {
-  console.log('\n  ✳️  Apagando servidor...');
+  console.log(`\n   ${simpleLog()}  ✳️  Apagando servidor...`);
   process.exit(0);
 });
