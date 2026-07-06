@@ -4,7 +4,7 @@
 <head>
  <meta charset="UTF-8" />
  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title>Radio Stream - Web Player</title>
+ <title>JxLiveRadio - Web Player</title>
  <link rel="icon" type="image/svg+xml" href="./logo.svg">
  <style>
   * {
@@ -25,9 +25,10 @@
 
   .container {
    z-index: 0;
+   min-width: 20.5rem;
    background: white;
    border-radius: 16px;
-   padding: 40px;
+   padding: 28px;
    max-width: 400px;
    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   }
@@ -36,14 +37,15 @@
    text-align: center;
    margin-bottom: 10px;
    color: #333;
+   font-size: 1.9rem;
   }
 
   .logo {
    z-index: -10;
    position: relative;
-   margin-top: -12.5rem;
+   margin-top: -10.5rem;
    left: -5rem;
-   width: 10rem;
+   width: 9rem;
    transform: rotate(-0.095turn);
   }
 
@@ -57,7 +59,7 @@
   h1,
   .status {
    text-align: right;
-  }
+}
 
   .player {
    background: #f5f5f5;
@@ -113,15 +115,16 @@
   }
 
   .info {
-   min-width: 18rem;
-   height: 10rem;
-   background: #ddd;
-   border: 1px solid #888;
-   color: #333;
-   padding: 1rem;
-   border-radius: 8px;
-   font-size: 14px;
-   line-height: 1.6;
+    display: none;
+    min-width: 18rem;
+    height: 10rem;
+    background: #ddd;
+    border: 1px solid #888;
+    color: #333;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.6;
   }
 
   .playbtn {
@@ -131,18 +134,39 @@
    height: 8rem;
    margin: 0 auto
   }
+
+  .connecting-banner {
+   display: none;
+   background: #fff3cd;
+   color: #856404;
+   border: 1px solid #ffc107;
+   border-radius: 8px;
+   padding: 10px 14px;
+   margin-bottom: 12px;
+   font-size: 13px;
+   text-align: center;
+   line-height: 1.5;
+  }
+
+  .connecting-banner.visible {
+   display: block;
+   max-width: 15rem;
+  }
  </style>
 </head>
 
 <body>
  <div class="container">
-  <h1>Jx Live Radio</h1>
+  <h1 id="stationTitle">JxLiveRadio</h1>
   <p class="status">Escuchá la transmisión en vivo</p>
 
   <img class="logo" src="./logo.svg" alt="logo">
 
   <div class="player">
-   <audio id="player" controls src="/audio"></audio>
+   <div class="connecting-banner" id="connectingBanner">
+    <p>⏳ Conectando…<br/>Espere unos segundos. Recargue la página si no empieza a reproducir en los próximos 10 segundos.</p>
+   </div>
+   <audio id="player" controls preload="none" src="/audio"></audio>
    <div class="stream-info" id="streamStatus">
     Consultando estado de la transmisión...
    </div>
@@ -163,6 +187,75 @@
  <script>
   const audio = document.getElementById("player");
   const streamStatus = document.getElementById("streamStatus");
+  const connectingBanner = document.getElementById("connectingBanner");
+  const stationTitleElement = document.getElementById("stationTitle");
+
+  let retryTimeout = null;
+  let retrying = false;
+
+  async function loadUiConfig() {
+   try {
+    const response = await fetch("/api/ui-config");
+    if (!response.ok) return;
+
+    const data = await response.json();
+    const stationTitle = typeof data.stationTitle === "string"
+     ? data.stationTitle.trim()
+     : "";
+
+    if (!stationTitle) return;
+
+    stationTitleElement.textContent = stationTitle;
+    document.title = stationTitle + " - Web Player";
+   } catch {
+    // keep default title when the config endpoint is unavailable
+   }
+  }
+
+  loadUiConfig();
+
+  function showBanner() {
+   connectingBanner.classList.add("visible");
+  }
+
+  function hideBanner() {
+   connectingBanner.classList.remove("visible");
+  }
+
+  function clearRetry() {
+   if (retryTimeout) {
+    clearTimeout(retryTimeout);
+    retryTimeout = null;
+   }
+   retrying = false;
+  }
+
+  function attemptPlay() {
+   audio.load();
+   audio.play().catch(() => {
+    // play() promise rejected — schedule retry
+    if (retrying) {
+     retryTimeout = setTimeout(attemptPlay, 3000);
+    }
+   });
+  }
+
+  audio.addEventListener("playing", () => {
+   clearRetry();
+   hideBanner();
+  });
+
+  audio.addEventListener("error", () => {
+   if (retrying) {
+    retryTimeout = setTimeout(attemptPlay, 3000);
+   }
+  });
+
+  audio.addEventListener("stalled", () => {
+   if (retrying) {
+    retryTimeout = setTimeout(attemptPlay, 2000);
+   }
+  });
 
   async function updateStatus() {
    try {
@@ -189,10 +282,15 @@
   }
 
   function play() {
-   audio.play();
+   clearRetry();
+   retrying = true;
+   showBanner();
+   attemptPlay();
   }
 
   function stop() {
+   clearRetry();
+   hideBanner();
    audio.pause();
    audio.currentTime = 0;
   }
