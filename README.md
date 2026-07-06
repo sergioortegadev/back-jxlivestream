@@ -30,6 +30,10 @@ HOST=0.0.0.0
 PUBLIC_URL=http://localhost:8000
 
 PUBLISH_TOKEN=xxxxxxxxxxxxxxxx
+
+TURSO_CONNECTION_URL=
+TURSO_AUTH_TOKEN=
+
 ```
 
 ## Ejecutar
@@ -44,5 +48,20 @@ Abrir:
 ```
 http://localhost:8000
 ```
+---
+
+### Comportamiento respecto a la conexión con DB para estadísticas:
+
+#### Analytics es "best-effort" - intenta guardar pero si falla, sigue funcionando.
+
+
+✅ BD disponible → guarda todo normalmente
+
+❌ BD no disponible → loguea error, sigue funcionando, endpoints retornan vacíos o datos en memoria
+
+❌ BD se recupera → intenta conectar nuevamente en próxima operación
+
+
+---
 
 ## Desarrollado por sergioortegadev
