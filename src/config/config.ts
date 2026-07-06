@@ -9,6 +9,10 @@ export default {
     publicUrl: process.env.PUBLIC_URL || '',
   },
 
+  ui: {
+    stationTitle: process.env.STATION_TITLE || 'JxLiveRadio',
+  },
+
   stream: {
     path: '/audio',
   },

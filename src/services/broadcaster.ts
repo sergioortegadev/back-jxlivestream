@@ -1,4 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Response } from 'express';
+import analytics from './analytics.js';
 
 export interface BroadcasterStats {
   listeners: number;
@@ -27,31 +29,20 @@ export default class Broadcaster {
     this.history = new Array(historySize);
   }
 
-  /*
-   * Indica que un emisor comenzó a transmitir
-   */
   publisherStarted(): void {
     this.publisherConnected = true;
     this.startedAt = Date.now();
     this.bytesReceived = 0;
   }
 
-  /*
-   * Indica que el emisor finalizó la transmisión
-   */
   publisherStopped(): void {
     this.publisherConnected = false;
   }
 
-  /*
-   * Publica un nuevo chunk de audio
-   */
   publish(chunk: Buffer): void {
     this.bytesReceived += chunk.length;
 
-    // Guarda en buffer circular
     this.history[this.writeIndex] = chunk;
-
     this.writeIndex = (this.writeIndex + 1) % this.historySize;
 
     if (this.buffered < this.historySize) {
@@ -62,53 +53,66 @@ export default class Broadcaster {
     for (const listener of this.listeners) {
       try {
         listener.write(chunk);
-      } catch {
+      } catch (error) {
+        // ✅ NUEVO: Registrar error de conexión
+        const listenerId = (listener as any).listenerId;
         this.listeners.delete(listener);
+        if (listenerId) {
+          analytics.recordConnectionError(listenerId);
+          analytics.recordListenerDrop(listenerId, this.listeners.size);
+        }
       }
     }
   }
 
-  /*
-   * Agrega un nuevo oyente
+  /**
+   * ✅ MODIFICADO: Agrega id y dispositivo
    */
-  subscribe(res: Response): void {
+  subscribe(res: Response, listenerId: string, ipAddress: string, deviceType?: string): void {
     this.sendHistory(res);
 
+    // ✅ Guardar metadata en la response
+    (res as any).listenerId = listenerId;
+    (res as any).startTime = Date.now();
+
     this.listeners.add(res);
+
+    // ✅ NUEVO: Registrar inicio de sesión (después de añadir al set para reflejar conteo real)
+    analytics.recordListenerStart(listenerId, ipAddress, deviceType, this.listeners.size);
+
+    // ✅ NUEVO: Actualizar bytes cuando se cierre
+    res.on('close', () => {
+      analytics.updateBytesReceived(listenerId, this.bytesReceived);
+      this.unsubscribe(res);
+      analytics.recordListenerEnd(listenerId, this.listeners.size);
+    });
+
+    res.on('error', () => {
+      this.unsubscribe(res);
+      analytics.recordListenerDrop(listenerId, this.listeners.size);
+    });
   }
 
-  /*
-   * Elimina un oyente
-   */
   unsubscribe(res: Response): void {
     this.listeners.delete(res);
   }
 
-  /*
-   * Envía el historial en orden cronológico
-   */
   private sendHistory(res: Response): void {
     if (this.buffered === 0) return;
 
-    // Si el buffer aún no está lleno
     if (this.buffered < this.historySize) {
       for (let i = 0; i < this.buffered; i++) {
         const chunk = this.history[i];
-
         if (chunk) {
           res.write(chunk);
         }
       }
-
       return;
     }
 
-    // Buffer lleno
     for (let i = 0; i < this.historySize; i++) {
       const index = (this.writeIndex + i) % this.historySize;
-
       const chunk = this.history[index];
-
       if (chunk) {
         res.write(chunk);
       }
@@ -117,7 +121,6 @@ export default class Broadcaster {
 
   getStats(): BroadcasterStats {
     const elapsedSeconds = Math.max((Date.now() - this.startedAt) / 1000, 1);
-
     const bitrateKbps = Math.round((this.bytesReceived * 8) / elapsedSeconds / 1000);
 
     return {
@@ -131,17 +134,11 @@ export default class Broadcaster {
 
   clear(): void {
     this.listeners.clear();
-
     this.history.fill(undefined);
-
     this.writeIndex = 0;
-
     this.buffered = 0;
-
     this.publisherConnected = false;
-
     this.bytesReceived = 0;
-
     this.startedAt = Date.now();
   }
 }
