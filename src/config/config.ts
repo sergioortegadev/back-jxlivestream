@@ -1,6 +1,9 @@
 import { config as loadEnv } from 'dotenv';
+import broadcaster from '../services/index.js';
 
 loadEnv();
+
+const { stationTitle, stationMessage } = broadcaster.getStreamInfo();
 
 export default {
   http: {
@@ -10,7 +13,8 @@ export default {
   },
 
   ui: {
-    stationTitle: process.env.STATION_TITLE || 'JxLiveRadio',
+    stationTitle: stationTitle,
+    stationMessage: stationMessage,
   },
 
   stream: {

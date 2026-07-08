@@ -9,6 +9,10 @@ const router = Router();
 router.post('/', authPublish, (req, res) => {
   console.log(`  ${simpleLog()}   ✅ Publisher conectado`);
 
+  const stationTitle   = typeof req.headers['x-station-title']   === 'string' ? req.headers['x-station-title']   : '';
+  const stationMessage = typeof req.headers['x-station-message'] === 'string' ? req.headers['x-station-message'] : '';
+  broadcaster.setStreamInfo(stationTitle, stationMessage);
+
   broadcaster.publisherStarted();
 
   let finished = false;
