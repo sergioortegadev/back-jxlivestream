@@ -158,7 +158,7 @@
 <body>
  <div class="container">
   <h1 id="stationTitle">JxLiveRadio</h1>
-  <p class="status">Escuchá la transmisión en vivo</p>
+  <p id="stationMessage" class="status">Escuchá la transmisión en vivo</p>
 
   <img class="logo" src="./logo.svg" alt="logo">
 
@@ -189,6 +189,7 @@
   const streamStatus = document.getElementById("streamStatus");
   const connectingBanner = document.getElementById("connectingBanner");
   const stationTitleElement = document.getElementById("stationTitle");
+  const stationMessageElement = document.getElementById("stationMessage");
 
   let retryTimeout = null;
   let retrying = false;
@@ -203,12 +204,20 @@
      ? data.stationTitle.trim()
      : "";
 
-    if (!stationTitle) return;
+    if (stationTitle) {
+     stationTitleElement.textContent = stationTitle;
+     document.title = stationTitle + " - Web Player";
+    }
 
-    stationTitleElement.textContent = stationTitle;
-    document.title = stationTitle + " - Web Player";
+    const stationMessage = typeof data.stationMessage === "string"
+     ? data.stationMessage.trim()
+     : "";
+
+    if (stationMessage && stationMessageElement) {
+     stationMessageElement.textContent = stationMessage;
+    }
    } catch {
-    // keep default title when the config endpoint is unavailable
+    // keep defaults when the config endpoint is unavailable
    }
   }
 
