@@ -25,6 +25,10 @@ export default class Broadcaster {
 
   private startedAt = Date.now();
 
+  private _stationTitle = '';
+
+  private _stationMessage = '';
+
   constructor(private readonly historySize = 10) {
     this.history = new Array(historySize);
   }
@@ -33,6 +37,15 @@ export default class Broadcaster {
     this.publisherConnected = true;
     this.startedAt = Date.now();
     this.bytesReceived = 0;
+  }
+
+  setStreamInfo(title: string, message: string): void {
+    this._stationTitle = title;
+    this._stationMessage = message;
+  }
+
+  getStreamInfo(): { stationTitle: string; stationMessage: string } {
+    return { stationTitle: this._stationTitle, stationMessage: this._stationMessage };
   }
 
   publisherStopped(): void {

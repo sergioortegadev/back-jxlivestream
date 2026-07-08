@@ -7,6 +7,7 @@ import config from './config/config.js';
 import publishRoute from './routes/publish.js';
 import audioRoute from './routes/audio.js';
 import healthRoute from './routes/health.js';
+import broadcaster from './services/index.js';
 import { simpleLog } from './helpers/helpers.js';
 import { initializeDatabase } from './db/schema.js';
 import analytics from './services/analytics.js';
@@ -63,8 +64,10 @@ app.get('/api/stream-url', (req, res) => {
 });
 
 app.get('/api/ui-config', (_req, res) => {
+  const { stationTitle, stationMessage } = broadcaster.getStreamInfo();
   res.json({
-    stationTitle: config.ui.stationTitle,
+    stationTitle:   stationTitle   || config.ui.stationTitle,
+    stationMessage: stationMessage || '',
   });
 });
 
