@@ -53,7 +53,7 @@ export async function initializeDatabase() {
       )
     `);
 
-    console.log(`${simpleLog()} ✅ Base de datos inicializada`);
+    console.log(`\n  ${simpleLog()} ✅ Base de datos inicializada`);
     return true;
   } catch (error) {
     // ✅ CAMBIO: Loguear pero NO crashear

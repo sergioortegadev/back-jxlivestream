@@ -7,11 +7,12 @@ import { simpleLog } from '../helpers/helpers.js';
 const router = Router();
 
 router.post('/', authPublish, (req, res) => {
-  console.log(`  ${simpleLog()}   ✅ Publisher conectado`);
+  console.log(`  ${simpleLog()}   ✅ Publisher conectado\n`);
 
   const stationTitle   = typeof req.headers['x-station-title']   === 'string' ? req.headers['x-station-title']   : '';
-  const stationMessage = typeof req.headers['x-station-message'] === 'string' ? req.headers['x-station-message'] : '';
-  broadcaster.setStreamInfo(stationTitle, stationMessage);
+  const stationSubTitle = typeof req.headers['x-station-subtitle'] === 'string' ? req.headers['x-station-subtitle'] : '';
+  const stationDescription = typeof req.headers['x-station-description'] === 'string' ? req.headers['x-station-description'] : '';
+  broadcaster.setStreamInfo(stationTitle, stationSubTitle, stationDescription);
 
   broadcaster.publisherStarted();
 
@@ -29,7 +30,7 @@ router.post('/', authPublish, (req, res) => {
   });
 
   req.on('end', () => {
-    console.log(`  ${simpleLog()}   ✳️ Publisher desconectado`);
+    console.log(`  ${simpleLog()}   🔸 Publisher desconectado`);
 
     stopPublisher();
 
@@ -37,7 +38,7 @@ router.post('/', authPublish, (req, res) => {
   });
 
   req.on('aborted', () => {
-    console.log(`  ${simpleLog()}   ✳️ Publisher desconectado (aborted)`);
+    console.log(`  ${simpleLog()}   🔸 Publisher desconectado (aborted)`);
 
     stopPublisher();
   });
@@ -51,7 +52,7 @@ router.post('/', authPublish, (req, res) => {
 
     // `aborted` ocurre cuando el emisor corta o reconecta; no es un 500 del servidor.
     if (message.toLowerCase().includes('aborted')) {
-      console.log(`  ${simpleLog()}   ✳️ Publisher desconectado (aborted)`);
+      console.log(`  ${simpleLog()}   🔸 Publisher desconectado (aborted)`);
       stopPublisher();
 
       return;
