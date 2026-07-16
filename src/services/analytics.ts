@@ -264,7 +264,7 @@ export class AnalyticsService {
       });
 
       console.log(
-        `${simpleLog()} 📊 Métrica 15min: drop=${metric.dropRatePercentage}%, error=${metric.errorRatePercentage}%`
+        `${simpleLog()} 📊 Metrics -> 15min: Drop=${metric.dropRatePercentage}%, Err=${metric.errorRatePercentage}%`
       );
     } catch (error) {
       this.dbAvailable = false;

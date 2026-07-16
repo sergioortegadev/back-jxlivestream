@@ -27,7 +27,9 @@ export default class Broadcaster {
 
   private _stationTitle = '';
 
-  private _stationMessage = '';
+  private _stationSubTitle = '';
+  
+  private _stationDescription = '';
 
   constructor(private readonly historySize = 10) {
     this.history = new Array(historySize);
@@ -39,13 +41,14 @@ export default class Broadcaster {
     this.bytesReceived = 0;
   }
 
-  setStreamInfo(title: string, message: string): void {
-    this._stationTitle = title;
-    this._stationMessage = message;
+  setStreamInfo(stationTitle: string, stationSubTitle: string, stationDescription: string ): void {
+    this._stationTitle = stationTitle;
+    this._stationSubTitle = stationSubTitle;
+    this._stationDescription = stationDescription;
   }
 
-  getStreamInfo(): { stationTitle: string; stationMessage: string } {
-    return { stationTitle: this._stationTitle, stationMessage: this._stationMessage };
+  getStreamInfo(): { stationTitle: string; stationSubTitle: string, stationDescription: string } {
+    return { stationTitle: this._stationTitle, stationSubTitle: this._stationSubTitle, stationDescription: this._stationDescription };
   }
 
   publisherStopped(): void {
