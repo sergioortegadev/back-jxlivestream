@@ -6,221 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JxLiveRadio — Estadísticas</title>
   <link rel="icon" type="image/svg+xml" href="./logo.svg">
+  <link rel="stylesheet" href="./style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      width: 100%;
-      overflow-x: hidden;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 28px 16px 40px;
-    }
-
-    .page-shell {
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    /* ── Header ── */
-    .page-header {
-      text-align: center;
-      color: white;
-      margin-bottom: 28px;
-    }
-
-    .page-header h1 {
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-
-    .page-header p {
-      font-size: 14px;
-      opacity: 0.75;
-    }
-
-    .page-header a {
-      display: inline-block;
-      margin-top: 10px;
-      font-size: 13px;
-      color: rgba(255, 255, 255, 0.7);
-      text-decoration: none;
-      border: 1px solid rgba(255, 255, 255, 0.35);
-      border-radius: 20px;
-      padding: 4px 14px;
-      transition: background 0.2s;
-    }
-
-    .page-header a:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    .logo {
-    z-index: -10;
-    position: relative;
-    margin-top: -12.5rem;
-    left: -2.75rem;
-    top: -2rem;
-    width: 7rem;
-    transform: rotate(-0.095turn);
-    }
-
-    /* ── Grid ── */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 18px;
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .widget-full {
-      grid-column: 1 / -1;
-    }
-
-    /* ── Widget base ── */
-    .widget {
-      background: white;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-
-    .widget-title {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: #aaa;
-      margin-bottom: 16px;
-    }
-
-    /* ── Numeric widgets ── */
-    .widget-numeric {
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 140px;
-    }
-
-    .widget-value {
-      font-size: 5rem;
-      font-weight: 800;
-      color: #333;
-      line-height: 1;
-      letter-spacing: -2px;
-      margin-bottom: 6px;
-    }
-
-    .widget-unit {
-      font-size: 15px;
-      color: #aaa;
-      font-weight: 500;
-    }
-
-    /* ── Chart widgets ── */
-    .chart-container {
-      position: relative;
-      flex: 1;
-      min-height: 200px;
-      min-width: 0;
-      overflow: hidden;
-    }
-
-    .chart-container canvas {
-      display: block;
-      width: 100% !important;
-      max-width: 100%;
-    }
-
-    /* ── Status bar ── */
-    .status-bar {
-      text-align: center;
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 12px;
-      margin-top: 20px;
-      letter-spacing: 0.03em;
-    }
-
-    .dot {
-      display: inline-block;
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #2ecc71;
-      margin-right: 5px;
-      vertical-align: middle;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0.3; }
-    }
-
-    /* ── Responsive ── */
-    @media (max-width: 640px) {
-      body {
-        padding: 14px 8px 24px;
-      }
-
-      .page-shell {
-        max-width: min(350px, 100%);
-      }
-
-      .grid {
-        grid-template-columns: minmax(0, 1fr);
-        max-width: 100%;
-      }
-
-      .widget-full {
-        grid-column: 1;
-      }
-
-      .widget {
-        padding: 18px;
-      }
-
-      .widget-value {
-        font-size: clamp(2.4rem, 14vw, 3.6rem);
-        overflow-wrap: anywhere;
-      }
-
-      .widget-numeric {
-        min-height: 110px;
-      }
-    }
-  </style>
 </head>
 
-<body>
+<body class="stats-page">
   <main class="page-shell">
     <div class="page-header">
       <h1>JxLiveRadio</h1>
       <p>Dashboard de estadísticas en vivo</p>
-      <a href="/">← Volver al reproductor</a>
+      <a class="btn-header-stats" href="/">← Player</a>
+      <a class="btn-header-stats" href="/home.html">← Home </a>
     </div>
 
-    <img class="logo" src="./logo.svg" alt="logo">
+    <img class="stats-logo" src="./logo.svg" alt="logo">
 
     <div class="grid">
 
-    <!-- Widget 1: Oyentes por minuto — timeseries -->
     <div class="widget widget-full">
       <div class="widget-title">Oyentes por minuto — últimos 60 min</div>
       <div class="chart-container">
@@ -228,21 +30,18 @@
       </div>
     </div>
 
-      <!-- Widget 2: Tiempo promedio de escucha -->
     <div class="widget widget-numeric">
       <div class="widget-title">Tiempo promedio de escucha — últimos 15 min</div>
       <div class="widget-value" id="avgDuration">—</div>
       <div class="widget-unit">minutos</div>
     </div>
 
-      <!-- Widget 3: Oyentes únicos por hora -->
     <div class="widget widget-numeric">
       <div class="widget-title">Oyentes únicos — últimos 15 min</div>
       <div class="widget-value" id="uniqueListeners">—</div>
       <div class="widget-unit">oyentes únicos</div>
     </div>
 
-    <!-- Widget 4: Tasa de rebote -->
     <div class="widget">
       <div class="widget-title">Tasa de rebote (drop rate) — últimos 15 min</div>
       <div class="chart-container">
@@ -250,7 +49,6 @@
       </div>
     </div>
 
-    <!-- Widget 5: Errores de conexión -->
     <div class="widget">
       <div class="widget-title">Errores de conexión — últimos 15 min</div>
       <div class="chart-container">
@@ -266,15 +64,13 @@
   </main>
 
   <script>
-    // ── Chart.js global defaults ──────────────────────────────────────────────
     Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     Chart.defaults.color = '#aaa';
 
-    const COLOR_PURPLE  = '#667eea';
-    const COLOR_RED     = '#e74c3c';
-    const COLOR_ORANGE  = '#f39c12';
+    const COLOR_PURPLE = '#667eea';
+    const COLOR_RED = '#e74c3c';
+    const COLOR_ORANGE = '#f39c12';
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
     function formatTime(isoString) {
       const d = new Date(isoString);
       return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
@@ -331,10 +127,9 @@
       chart.update('none');
     }
 
-    // ── Init charts ───────────────────────────────────────────────────────────
     const chartListeners = buildChart('chartListeners', 'Oyentes activos', COLOR_PURPLE);
-    const chartDropRate  = buildChart('chartDropRate',  'Drop rate %',      COLOR_RED);
-    const chartErrors    = buildChart('chartErrors',    'Error rate %',     COLOR_ORANGE);
+    const chartDropRate = buildChart('chartDropRate', 'Drop rate %', COLOR_RED);
+    const chartErrors = buildChart('chartErrors', 'Error rate %', COLOR_ORANGE);
 
     let resizeRaf;
     window.addEventListener('resize', () => {
@@ -346,7 +141,6 @@
       });
     });
 
-    // ── Data fetch ────────────────────────────────────────────────────────────
     async function fetchAll() {
       try {
         const [minuteRes, hourRes, intervalRes] = await Promise.all([
@@ -359,18 +153,16 @@
           throw new Error('Respuesta no válida del servidor');
         }
 
-        const minuteData   = await minuteRes.json();
-        const hourData     = await hourRes.json();
+        const minuteData = await minuteRes.json();
+        const hourData = await hourRes.json();
         const intervalData = await intervalRes.json();
 
-        // ── Chart 1: Oyentes por minuto ──────────────────────────────────────
         patchChart(
           chartListeners,
           minuteData.map(r => formatTime(r.timestamp)),
           minuteData.map(r => Number(r.active_listeners))
         );
 
-        // ── Numeric: Tiempo promedio de escucha (seg → min) ──────────────────
         const avgEl = document.getElementById('avgDuration');
         if (hourData.length > 0) {
           const avgSec = Number(hourData[0].avg_duration || 0);
@@ -379,12 +171,10 @@
           avgEl.textContent = '—';
         }
 
-        // ── Numeric: Oyentes únicos ──────────────────────────────────────────
-        const uniqueEl    = document.getElementById('uniqueListeners');
+        const uniqueEl = document.getElementById('uniqueListeners');
         const uniqueCount = hourData.length > 0 ? Number(hourData[0].unique_listeners || 0) : 0;
         uniqueEl.textContent = uniqueCount > 0 ? uniqueCount : '—';
 
-        // ── Charts 4 & 5: interval metrics (ordenados cronológicamente) ──────
         const sorted = [...intervalData].sort(
           (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
         );
@@ -401,7 +191,6 @@
           sorted.map(r => Number(r.error_rate_percentage))
         );
 
-        // ── Status bar ───────────────────────────────────────────────────────
         const now = new Date().toLocaleTimeString('es-AR');
         document.getElementById('statusBar').innerHTML =
           `<span class="dot"></span> Última actualización: ${now} &nbsp;·&nbsp; Próxima en 60 s`;
@@ -413,9 +202,30 @@
       }
     }
 
-    // Carga inicial + refresco cada 60 segundos (sin recargar la página)
+    async function loadUiConfig () {
+      try {
+        const response = await fetch("/api/ui-config");
+        if (!response.ok) return;
+        
+        const data = await response.json();
+        const stationTitle = typeof data.stationTitle === 'string'
+        ? data.stationTitle.trim()
+        : "";
+
+        if (stationTitle) {
+          document.title = stationTitle + " - Estadísticas";
+        }
+
+
+      } catch {
+        // keep default title when the config endpoint is unavailable
+      }
+    };
+
+    loadUiConfig();
     fetchAll();
     setInterval(fetchAll, 60_000);
+
   </script>
 </body>
 

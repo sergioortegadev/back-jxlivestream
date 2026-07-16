@@ -4,28 +4,36 @@
 <head>
  <meta charset="UTF-8" />
  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
- <title>JxLiveRadio - Web Player</title>
+ <title>JxLiveRadio - Home</title>
  <link rel="icon" type="image/svg+xml" href="./logo.svg">
  <link rel="stylesheet" href="./style.css" />
 </head>
 
-<body class="player-page">
+<body class="player-page home-page">
  <div class="container">
   <h1 id="stationTitle">JxLiveRadio</h1>
   <p class="status" id="stationSubTitle">Escucha la transmisión en vivo</p>
 
   <img class="logo" src="./logo.svg" alt="logo">
 
-  <div class="player">
-   <div class="connecting-banner" id="connectingBanner">
-    <p>⏳ Conectando...<br/>Espere unos segundos. Recargue la página si no empieza a reproducir en los próximos 10 segundos.</p>
-   </div>
-   <audio id="player" controls preload="none" src="/audio"></audio>
+  <div class="home-panel">
    <div class="stream-info" id="streamStatus">
     Consultando estado de la transmisión...
    </div>
-   <button class="btn-play" onclick="play()">▶ Play</button>
-   <button class="btn-stop" onclick="stop()">⏹ Stop</button>
+
+   <div class="description-box desc-upper">
+    <span class="description-label">Transmisión en vivo de audio</span>
+    <p class="description-text">Sistema para radio online / Streaming en Vivo. Con la capacidad de mostrar estadísticas de conexión.</p>
+   </div>
+
+   <div class="description-box" id="stationDescription-div">
+    <p class="description-text" id="stationDescription">Cargando descripción...</p>
+   </div>
+
+   <div class="nav-buttons">
+    <a class="btn-link btn-play" href="./stats.html">📊 Estadísticas en vivo</a>
+    <a class="btn-link btn-stop" href="./index.html">🎧 Ir al player</a>
+   </div>
   </div>
 
   <div class="info">
@@ -39,14 +47,11 @@
  </div>
 
  <script>
-  const audio = document.getElementById("player");
   const streamStatus = document.getElementById("streamStatus");
-  const connectingBanner = document.getElementById("connectingBanner");
   const stationTitleElement = document.getElementById("stationTitle");
   const stationSubTitleElement = document.getElementById("stationSubTitle");
-
-  let retryTimeout = null;
-  let retrying = false;
+  const stationDescriptionElement = document.getElementById("stationDescription");
+  const stationDescriptionDivElement = document.getElementById("stationDescription-div");
 
   async function loadUiConfig() {
    try {
@@ -60,63 +65,29 @@
     const stationSubTitle = typeof data.stationSubTitle === "string"
      ? data.stationSubTitle.trim()
      : "";
+    const stationDescription = typeof data.stationDescription === "string"
+     ? data.stationDescription.trim()
+     : "";
 
     if (stationTitle) {
      stationTitleElement.textContent = stationTitle;
-     document.title = stationTitle + " - Web Player";
+     document.title = stationTitle + " - Home";
     }
 
     if (stationSubTitle) {
      stationSubTitleElement.textContent = stationSubTitle;
     }
-   } catch {
-    // keep default title when the config endpoint is unavailable
-   }
-  }
-
-  loadUiConfig();
-
-  function showBanner() {
-   connectingBanner.classList.add("visible");
-  }
-
-  function hideBanner() {
-   connectingBanner.classList.remove("visible");
-  }
-
-  function clearRetry() {
-   if (retryTimeout) {
-    clearTimeout(retryTimeout);
-    retryTimeout = null;
-   }
-   retrying = false;
-  }
-
-  function attemptPlay() {
-   audio.load();
-   audio.play().catch(() => {
-    if (retrying) {
-     retryTimeout = setTimeout(attemptPlay, 3000);
+    
+    if (stationDescription !== '') {   
+        stationDescriptionElement.textContent = stationDescription
+    } else {
+        stationDescriptionDivElement.style.display = 'none';
     }
-   });
+    
+   } catch {
+    
+   }
   }
-
-  audio.addEventListener("playing", () => {
-   clearRetry();
-   hideBanner();
-  });
-
-  audio.addEventListener("error", () => {
-   if (retrying) {
-    retryTimeout = setTimeout(attemptPlay, 3000);
-   }
-  });
-
-  audio.addEventListener("stalled", () => {
-   if (retrying) {
-    retryTimeout = setTimeout(attemptPlay, 2000);
-   }
-  });
 
   async function updateStatus() {
    try {
@@ -142,20 +113,7 @@
    }
   }
 
-  function play() {
-   clearRetry();
-   retrying = true;
-   showBanner();
-   attemptPlay();
-  }
-
-  function stop() {
-   clearRetry();
-   hideBanner();
-   audio.pause();
-   audio.currentTime = 0;
-  }
-
+  loadUiConfig();
   updateStatus();
   setInterval(updateStatus, 5000);
  </script>

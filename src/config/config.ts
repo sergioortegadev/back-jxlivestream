@@ -3,7 +3,7 @@ import broadcaster from '../services/index.js';
 
 loadEnv();
 
-const { stationTitle, stationMessage } = broadcaster.getStreamInfo();
+const { stationTitle, stationSubTitle, stationDescription } = broadcaster.getStreamInfo();
 
 export default {
   http: {
@@ -13,8 +13,9 @@ export default {
   },
 
   ui: {
-    stationTitle: stationTitle,
-    stationMessage: stationMessage,
+    stationTitle: stationTitle || 'JxLiveStream', 
+    stationSubTitle: stationSubTitle || 'Escucha la transmisión en vivo',
+    stationDescription: stationDescription || '',
   },
 
   stream: {
